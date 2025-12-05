@@ -3,10 +3,6 @@ storage/framework/
 storage/logs/
 bootstrap/cache/
 
-# Environment files  
-.env
-.env.*
-
 # Dependencies
 /vendor
 /node_modules
