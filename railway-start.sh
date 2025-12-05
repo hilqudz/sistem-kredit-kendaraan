@@ -29,7 +29,7 @@ LOG_LEVEL=error
 DB_CONNECTION=sqlite
 DB_HOST=
 DB_PORT=
-DB_DATABASE=
+DB_DATABASE=/tmp/database.sqlite
 DB_USERNAME=
 DB_PASSWORD=
 
@@ -53,15 +53,16 @@ EOF
 export DB_CONNECTION=sqlite
 export DB_HOST=""
 export DB_PORT=""
-export DB_DATABASE=""
+export DB_DATABASE="/tmp/database.sqlite"
 export DB_USERNAME=""
 export DB_PASSWORD=""
 
 # Ensure database directory exists and create SQLite file
 echo "📁 Creating SQLite database..."
-mkdir -p database
-touch database/database.sqlite
-chmod 666 database/database.sqlite
+# Use /tmp for writable storage in Railway
+touch /tmp/database.sqlite
+chmod 666 /tmp/database.sqlite
+echo "✅ SQLite database created at /tmp/database.sqlite"
 
 # Generate application key if not exists (with fallback)
 if [ -z "$APP_KEY" ]; then
@@ -108,7 +109,7 @@ fi
 # Set correct permissions
 echo "🔒 Setting permissions..."
 chmod -R 755 storage bootstrap/cache 2>/dev/null || true
-chmod 666 database/database.sqlite 2>/dev/null || true
+chmod 666 /tmp/database.sqlite 2>/dev/null || true
 
 echo "✅ Railway deployment completed!"
 
