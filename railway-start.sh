@@ -80,13 +80,32 @@ if [ -n "$DB_HOST" ] && [ -n "$DB_USERNAME" ]; then
         attempt=$((attempt + 1))
         if [ $attempt -ge $max_attempts ]; then
             echo "❌ Database connection timeout after $max_attempts attempts"
+            echo "🔄 Falling back to SQLite..."
+            sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env
+            sed -i 's/DB_HOST=.*/DB_HOST=/' .env
+            sed -i 's/DB_PORT=.*/DB_PORT=/' .env
+            sed -i 's/DB_DATABASE=.*/DB_DATABASE=/' .env
+            sed -i 's/DB_USERNAME=.*/DB_USERNAME=/' .env
+            sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+            touch database/database.sqlite
+            chmod 666 database/database.sqlite
+            echo "✅ SQLite fallback configured"
             break
         fi
         echo "Database not ready, waiting... (attempt $attempt/$max_attempts)"
         sleep 10
     done
 else
-    echo "No database configuration found, skipping database checks"
+    echo "No database configuration found, using SQLite fallback..."
+    sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env
+    sed -i 's/DB_HOST=.*/DB_HOST=/' .env
+    sed -i 's/DB_PORT=.*/DB_PORT=/' .env
+    sed -i 's/DB_DATABASE=.*/DB_DATABASE=/' .env
+    sed -i 's/DB_USERNAME=.*/DB_USERNAME=/' .env
+    sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+    touch database/database.sqlite
+    chmod 666 database/database.sqlite
+    echo "✅ SQLite configured as fallback"
 fi
 
 # Clear and cache configuration
@@ -101,8 +120,8 @@ fi
 
 # Run database migrations
 echo "🗄️ Running database migrations..."
-if [ -f artisan ] && [ -n "$DB_HOST" ]; then
-    php artisan migrate --force 2>/dev/null || echo "Migration failed or no database"
+if [ -f artisan ]; then
+    php artisan migrate --force 2>/dev/null || echo "Migration failed, but continuing..."
 fi
 
 # Set correct permissions
