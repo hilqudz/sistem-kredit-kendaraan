@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+# Ensure we're in the correct directory
+cd /var/www/html || exit 1
+
 echo "🚀 Starting Railway deployment..."
+echo "📍 Current directory: $(pwd)"
+echo "📂 Directory contents:"
+ls -la
 
 # Force unset any database environment variables first
 unset DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD DATABASE_URL MYSQL_URL 2>/dev/null || true
@@ -132,6 +138,34 @@ fi
 echo "🔒 Setting permissions..."
 chmod -R 755 storage bootstrap/cache 2>/dev/null || true
 chmod 666 /tmp/database.sqlite 2>/dev/null || true
+
+# Ensure Laravel bootstrap files are correct
+echo "🔧 Checking Laravel bootstrap..."
+if [ ! -f "public/index.php" ]; then
+    echo "❌ Missing public/index.php"
+    ls -la public/
+else
+    echo "✅ public/index.php exists"
+fi
+
+if [ ! -f "bootstrap/app.php" ]; then
+    echo "❌ Missing bootstrap/app.php"
+    ls -la bootstrap/
+else
+    echo "✅ bootstrap/app.php exists"
+fi
+
+# Test if basic PHP works
+echo "🧪 Testing PHP..."
+php -v
+
+# Test Laravel artisan
+echo "🧪 Testing artisan..."
+php artisan --version 2>/dev/null || echo "❌ Artisan failed"
+
+# Run comprehensive Laravel test
+echo "🔍 Running Laravel diagnostics..."
+php test-laravel.php
 
 echo "✅ Railway deployment completed!"
 
