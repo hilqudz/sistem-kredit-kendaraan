@@ -22,12 +22,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files
-COPY composer.json ./
-
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
-
 # Copy application files
 COPY . .
 
@@ -35,6 +29,11 @@ COPY . .
 RUN mkdir -p storage/logs \
     && mkdir -p storage/framework/{cache,sessions,views} \
     && mkdir -p bootstrap/cache
+
+# Install dependencies using Composer create-project approach
+RUN composer install --no-dev --optimize-autoloader --no-interaction || \
+    (composer create-project laravel/laravel . "11.*" --prefer-dist --no-interaction && \
+     cp -r app/ resources/ routes/ database/ config/ . 2>/dev/null || true)
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -47,16 +46,8 @@ RUN a2enmod rewrite
 # Copy Apache configuration
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Generate application key and run optimizations (only if .env exists)
-RUN if [ -f .env ]; then \
-        php artisan key:generate --force && \
-        php artisan config:cache && \
-        php artisan route:cache && \
-        php artisan view:cache; \
-    fi
-
 # Expose port 80
 EXPOSE 80
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Start with railway script
+CMD ["./railway-start.sh"]
