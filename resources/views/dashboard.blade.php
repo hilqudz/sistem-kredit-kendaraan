@@ -211,7 +211,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($data as $item)
-                                    <tr class="border-b hover:bg-gray-50" x-data="{ showApproval: false, showReject: false }">
+                                    <tr class="border-b hover:bg-gray-50">
                                         <td class="p-4">
                                             <div>
                                                 <p class="font-medium text-gray-900">{{ $item->customer_name }}</p>
@@ -244,20 +244,18 @@
                                         <td class="p-4">
                                             @if($item->status == 'Submitted')
                                                 <div class="flex gap-2">
-                                                    <button @click="showApproval = true" 
+                                                    <button onclick="showApprovalModal({{ $item->id }})" 
                                                             class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition">
                                                         Setujui
                                                     </button>
-                                                    <button @click="showReject = true" 
+                                                    <button onclick="showRejectModal({{ $item->id }})" 
                                                             class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition">
                                                         Tolak
                                                     </button>
                                                 </div>
 
                                                 <!-- Modal Approve -->
-                                                <div x-show="showApproval" x-cloak 
-                                                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                                     @click.self="showApproval = false">
+                                                <div id="approvalModal{{ $item->id }}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
                                                     <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
                                                         <h3 class="text-lg font-semibold mb-4">Konfirmasi Persetujuan</h3>
                                                         <p class="text-gray-600 mb-4">Setujui pengajuan kredit atas nama <strong>{{ $item->customer_name }}</strong>?</p>
@@ -273,7 +271,7 @@
                                                                 <textarea name="notes" class="w-full border border-gray-300 rounded px-3 py-2" rows="3" placeholder="Tambahkan catatan approval..."></textarea>
                                                             </div>
                                                             <div class="flex gap-2 justify-end">
-                                                                <button type="button" @click="showApproval = false" 
+                                                                <button type="button" onclick="hideApprovalModal({{ $item->id }})" 
                                                                         class="px-4 py-2 text-gray-600 hover:text-gray-800 border rounded">Batal</button>
                                                                 <button type="submit" 
                                                                         class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
@@ -285,9 +283,7 @@
                                                 </div>
 
                                                 <!-- Modal Reject -->
-                                                <div x-show="showReject" x-cloak 
-                                                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                                                     @click.self="showReject = false">
+                                                <div id="rejectModal{{ $item->id }}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
                                                     <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
                                                         <h3 class="text-lg font-semibold mb-4">Konfirmasi Penolakan</h3>
                                                         <p class="text-gray-600 mb-4">Tolak pengajuan kredit atas nama <strong>{{ $item->customer_name }}</strong>?</p>
@@ -298,7 +294,7 @@
                                                                 <textarea name="notes" required class="w-full border border-gray-300 rounded px-3 py-2" rows="4" placeholder="Berikan alasan penolakan yang jelas..."></textarea>
                                                             </div>
                                                             <div class="flex gap-2 justify-end">
-                                                                <button type="button" @click="showReject = false" 
+                                                                <button type="button" onclick="hideRejectModal({{ $item->id }})" 
                                                                         class="px-4 py-2 text-gray-600 hover:text-gray-800 border rounded">Batal</button>
                                                                 <button type="submit" 
                                                                         class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
@@ -386,6 +382,44 @@
         document.getElementById('imageModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeImageModal();
+            }
+        });
+
+        // Modal functions for approval/rejection
+        function showApprovalModal(id) {
+            document.getElementById('approvalModal' + id).classList.remove('hidden');
+        }
+
+        function hideApprovalModal(id) {
+            document.getElementById('approvalModal' + id).classList.add('hidden');
+        }
+
+        function showRejectModal(id) {
+            document.getElementById('rejectModal' + id).classList.remove('hidden');
+        }
+
+        function hideRejectModal(id) {
+            document.getElementById('rejectModal' + id).classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                // Close all modals when clicking outside
+                const modals = document.querySelectorAll('[id^="approvalModal"], [id^="rejectModal"]');
+                modals.forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('[id^="approvalModal"], [id^="rejectModal"]');
+                modals.forEach(modal => {
+                    modal.classList.add('hidden');
+                });
             }
         });
     </script>
