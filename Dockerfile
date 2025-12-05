@@ -23,13 +23,18 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Copy composer files
-COPY composer.json composer.lock ./
+COPY composer.json ./
 
 # Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
 # Copy application files
 COPY . .
+
+# Create Laravel required directories
+RUN mkdir -p storage/logs \
+    && mkdir -p storage/framework/{cache,sessions,views} \
+    && mkdir -p bootstrap/cache
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -42,15 +47,13 @@ RUN a2enmod rewrite
 # Copy Apache configuration
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Create directories for Laravel
-RUN mkdir -p /var/www/html/storage/logs \
-    && mkdir -p /var/www/html/storage/framework/{cache,sessions,views} \
-    && mkdir -p /var/www/html/bootstrap/cache
-
-# Generate application key and run optimizations
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Generate application key and run optimizations (only if .env exists)
+RUN if [ -f .env ]; then \
+        php artisan key:generate --force && \
+        php artisan config:cache && \
+        php artisan route:cache && \
+        php artisan view:cache; \
+    fi
 
 # Expose port 80
 EXPOSE 80

@@ -1,0 +1,31 @@
+# Laravel folders
+storage/framework/
+storage/logs/
+bootstrap/cache/
+
+# Environment files  
+.env
+.env.*
+
+# Dependencies
+/vendor
+/node_modules
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+/public/build
+/public/hot
