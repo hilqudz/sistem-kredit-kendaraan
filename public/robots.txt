@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /storage/
+Disallow: /vendor/
+Disallow: /.env
+Disallow: /database/
+
+Allow: /
+
+Sitemap: https://your-domain.com/sitemap.xml
