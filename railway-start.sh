@@ -24,12 +24,12 @@ LOG_CHANNEL=stack
 LOG_STACK=single
 LOG_LEVEL=error
 
-DB_CONNECTION=mysql
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT:-3306}
-DB_DATABASE=${DB_DATABASE}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
+DB_CONNECTION=sqlite
+DB_HOST=
+DB_PORT=
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
 
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
@@ -81,12 +81,49 @@ if [ -n "$DB_HOST" ] && [ -n "$DB_USERNAME" ]; then
         if [ $attempt -ge $max_attempts ]; then
             echo "❌ Database connection timeout after $max_attempts attempts"
             echo "🔄 Falling back to SQLite..."
-            sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env
-            sed -i 's/DB_HOST=.*/DB_HOST=/' .env
-            sed -i 's/DB_PORT=.*/DB_PORT=/' .env
-            sed -i 's/DB_DATABASE=.*/DB_DATABASE=/' .env
-            sed -i 's/DB_USERNAME=.*/DB_USERNAME=/' .env
-            sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+            # Update .env to use SQLite
+            cat > .env << EOF
+APP_NAME="${APP_NAME:-Credit System}"
+APP_ENV=production
+APP_KEY=${APP_KEY}
+APP_DEBUG=false
+APP_TIMEZONE=UTC
+APP_URL=${APP_URL}
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_LEVEL=error
+
+DB_CONNECTION=sqlite
+DB_HOST=
+DB_PORT=
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+CACHE_PREFIX=
+
+MAIL_MAILER=log
+MAIL_FROM_ADDRESS="noreply@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+EOF
+            # Ensure database directory exists
+            mkdir -p database
             touch database/database.sqlite
             chmod 666 database/database.sqlite
             echo "✅ SQLite fallback configured"
@@ -97,12 +134,9 @@ if [ -n "$DB_HOST" ] && [ -n "$DB_USERNAME" ]; then
     done
 else
     echo "No database configuration found, using SQLite fallback..."
-    sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env
-    sed -i 's/DB_HOST=.*/DB_HOST=/' .env
-    sed -i 's/DB_PORT=.*/DB_PORT=/' .env
-    sed -i 's/DB_DATABASE=.*/DB_DATABASE=/' .env
-    sed -i 's/DB_USERNAME=.*/DB_USERNAME=/' .env
-    sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
+    # Ensure database directory exists
+    mkdir -p database
+    # Create SQLite database file
     touch database/database.sqlite
     chmod 666 database/database.sqlite
     echo "✅ SQLite configured as fallback"
@@ -111,16 +145,25 @@ fi
 # Clear and cache configuration
 echo "⚙️ Optimizing application..."
 if [ -f artisan ]; then
+    # Clear cache first to ensure clean state
     php artisan config:clear 2>/dev/null || true
     php artisan cache:clear 2>/dev/null || true
+    php artisan route:clear 2>/dev/null || true
+    php artisan view:clear 2>/dev/null || true
+    
+    # Cache configurations
     php artisan config:cache 2>/dev/null || true
     php artisan route:cache 2>/dev/null || true
-    php artisan view:cache 2>/dev/null || true
 fi
 
 # Run database migrations
 echo "🗄️ Running database migrations..."
 if [ -f artisan ]; then
+    # Check database connection first
+    echo "🔍 Testing database connection..."
+    php artisan tinker --execute="echo 'DB Connection: ' . config('database.default'); try { DB::connection()->getPdo(); echo ' - Connection successful'; } catch (Exception \$e) { echo ' - Connection failed: ' . \$e->getMessage(); }" 2>/dev/null || echo "Could not test connection"
+    
+    # Run migrations
     php artisan migrate --force 2>/dev/null || echo "Migration failed, but continuing..."
 fi
 
