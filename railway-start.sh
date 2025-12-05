@@ -48,46 +48,62 @@ MAIL_FROM_NAME="${APP_NAME}"
 EOF
 fi
 
-# Generate application key if not exists
+# Generate application key if not exists (with fallback)
 if [ -z "$APP_KEY" ]; then
     echo "🔑 Generating application key..."
-    php artisan key:generate --force
+    if [ -f artisan ]; then
+        php artisan key:generate --force || echo "Warning: Could not generate key via artisan"
+    fi
+    # Fallback: generate key manually if artisan fails
+    if [ -z "$APP_KEY" ]; then
+        APP_KEY="base64:$(openssl rand -base64 32)"
+        sed -i "s/APP_KEY=.*/APP_KEY=${APP_KEY}/" .env
+        echo "Generated fallback APP_KEY"
+    fi
 fi
 
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
-max_attempts=30
-attempt=0
-until php -r "
-try {
-    \$pdo = new PDO('mysql:host=${DB_HOST};port=${DB_PORT:-3306}', '${DB_USERNAME}', '${DB_PASSWORD}');
-    echo 'Database connection successful';
-    exit(0);
-} catch (Exception \$e) {
-    echo 'Database connection failed: ' . \$e->getMessage();
-    exit(1);
-}
-" > /dev/null 2>&1; do
-    attempt=$((attempt + 1))
-    if [ $attempt -ge $max_attempts ]; then
-        echo "❌ Database connection timeout after $max_attempts attempts"
-        break
-    fi
-    echo "Database not ready, waiting... (attempt $attempt/$max_attempts)"
-    sleep 10
-done
+if [ -n "$DB_HOST" ] && [ -n "$DB_USERNAME" ]; then
+    max_attempts=30
+    attempt=0
+    until php -r "
+    try {
+        \$pdo = new PDO('mysql:host=${DB_HOST};port=${DB_PORT:-3306}', '${DB_USERNAME}', '${DB_PASSWORD}');
+        echo 'Database connection successful';
+        exit(0);
+    } catch (Exception \$e) {
+        echo 'Database connection failed: ' . \$e->getMessage();
+        exit(1);
+    }
+    " > /dev/null 2>&1; do
+        attempt=$((attempt + 1))
+        if [ $attempt -ge $max_attempts ]; then
+            echo "❌ Database connection timeout after $max_attempts attempts"
+            break
+        fi
+        echo "Database not ready, waiting... (attempt $attempt/$max_attempts)"
+        sleep 10
+    done
+else
+    echo "No database configuration found, skipping database checks"
+fi
 
 # Clear and cache configuration
 echo "⚙️ Optimizing application..."
-php artisan config:clear 2>/dev/null || true
-php artisan cache:clear 2>/dev/null || true
-php artisan config:cache
-php artisan route:cache 2>/dev/null || true
-php artisan view:cache 2>/dev/null || true
+if [ -f artisan ]; then
+    php artisan config:clear 2>/dev/null || true
+    php artisan cache:clear 2>/dev/null || true
+    php artisan config:cache 2>/dev/null || true
+    php artisan route:cache 2>/dev/null || true
+    php artisan view:cache 2>/dev/null || true
+fi
 
 # Run database migrations
 echo "🗄️ Running database migrations..."
-php artisan migrate --force
+if [ -f artisan ] && [ -n "$DB_HOST" ]; then
+    php artisan migrate --force 2>/dev/null || echo "Migration failed or no database"
+fi
 
 # Set correct permissions
 echo "🔒 Setting permissions..."
