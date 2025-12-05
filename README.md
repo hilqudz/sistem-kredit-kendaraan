@@ -1,31 +1,31 @@
-# Sistem Pengajuan Kredit Kendaraan
+# Vehicle Credit Application System
 
-Sistem web untuk pengajuan dan persetujuan kredit kendaraan yang dibangun dengan Laravel dan MySQL, dikonfigurasi untuk deployment di Railway.
+A web-based vehicle credit application and approval system built with Laravel and MySQL, configured for Railway deployment.
 
-## 🚀 Fitur Utama
+## 🚀 Key Features
 
-- **Sistem Pengajuan Kredit**: Interface untuk sales mengajukan kredit konsumen
-- **Dashboard Approval**: Interface untuk atasan marketing menyetujui atau menolak pengajuan
-- **Upload KTP**: Upload dan penyimpanan gambar KTP dalam format Base64
-- **Validasi Ketat**: Validasi NIK, harga kendaraan, dan data konsumen
-- **Responsive Design**: Interface responsif menggunakan Tailwind CSS
-- **Security Headers**: Implementasi security headers untuk keamanan aplikasi
-- **Railway Ready**: Konfigurasi lengkap untuk deployment di Railway
+- **Credit Application System**: Interface for sales to submit customer credit applications
+- **Approval Dashboard**: Interface for marketing supervisors to approve or reject applications
+- **ID Card Upload**: Upload and store ID card images in Base64 format
+- **Strict Validation**: Validation for ID numbers, vehicle prices, and customer data
+- **Responsive Design**: Responsive interface using Tailwind CSS
+- **Security Headers**: Implementation of security headers for application security
+- **Railway Ready**: Complete configuration for Railway deployment
 
-## 📋 Fitur Utama
+## 📋 Main Features
 
-### Form Pengajuan (Sales)
-- Input data konsumen (nama, NIK, jenis kendaraan, harga)
-- Upload foto KTP dengan validasi
-- Validasi NIK unik (tidak boleh duplikat)
-- Validasi harga kendaraan (Rp 10 juta - Rp 2 miliar)
+### Application Form (Sales)
+- Input customer data (name, ID number, vehicle type, price)
+- Upload ID card photo with validation
+- Unique ID number validation (no duplicates allowed)
+- Vehicle price validation ($10,000 - $2 billion)
 
-### Dashboard Approval (Atasan Marketing)
-- View semua pengajuan dengan status
-- Filter berdasarkan status (Submitted, Approved, Rejected)
-- Search berdasarkan nama atau NIK
-- Approve/reject pengajuan dengan catatan
-- View gambar KTP dalam modal
+### Approval Dashboard (Marketing Supervisor)
+- View all applications with status
+- Filter by status (Submitted, Approved, Rejected)
+- Search by name or ID number
+- Approve/reject applications with notes
+- View ID card images in modal
 - Statistics dashboard
 
 ## 🛠️ Tech Stack
@@ -33,7 +33,7 @@ Sistem web untuk pengajuan dan persetujuan kredit kendaraan yang dibangun dengan
 - **Backend**: PHP 8.2, Laravel 11
 - **Database**: MySQL
 - **Frontend**: Blade Templates, Tailwind CSS, Alpine.js
-- **Deployment**: Railway dengan Docker
+- **Deployment**: Railway with Docker
 - **Storage**: Base64 image storage (Railway compatible)
 
 ## 📦 Installation
@@ -83,12 +83,12 @@ Visit http://localhost:8000
 ### Railway Deployment
 
 1. **Prepare Railway Project**
-   - Create new project di Railway
+   - Create new project on Railway
    - Add MySQL database service
    - Connect GitHub repository
 
 2. **Configure Environment Variables**
-   - Set variabel berikut di Railway dashboard:
+   - Set the following variables in Railway dashboard:
    ```
    APP_NAME="Credit System"
    APP_ENV=production
@@ -105,10 +105,10 @@ Visit http://localhost:8000
    ```
 
 3. **Deploy**
-   - Push code ke GitHub
-   - Railway akan otomatis build dan deploy menggunakan Dockerfile
+   - Push code to GitHub
+   - Railway will automatically build and deploy using Dockerfile
 
-## 📁 Struktur Project
+## 📁 Project Structure
 
 ```
 ├── app/
@@ -136,12 +136,12 @@ Visit http://localhost:8000
 └── README.md
 ```
 
-## 🔒 Fitur Keamanan
+## 🔒 Security Features
 
-- **CSRF Protection**: Token CSRF untuk semua form
-- **Input Validation**: Validasi ketat untuk semua input
+- **CSRF Protection**: CSRF tokens for all forms
+- **Input Validation**: Strict validation for all inputs
 - **Security Headers**: X-Frame-Options, CSP, XSS Protection
-- **File Upload Security**: Validasi tipe dan ukuran file
+- **File Upload Security**: File type and size validation
 - **Database Security**: Prepared statements, input sanitization
 
 ## 📊 Database Schema
@@ -151,39 +151,39 @@ Visit http://localhost:8000
 | Column | Type | Description |
 |--------|------|-------------|
 | id | BIGINT(20) | Primary key |
-| customer_name | VARCHAR(255) | Nama konsumen |
-| nik | VARCHAR(16) | NIK konsumen (unique) |
-| vehicle_type | VARCHAR(100) | Jenis kendaraan |
-| vehicle_price | DECIMAL(15,2) | Harga kendaraan |
-| ktp_image_base64 | TEXT | Gambar KTP dalam Base64 |
-| status | VARCHAR(50) | Status pengajuan |
-| notes | TEXT | Catatan approval/reject |
-| approved_at | TIMESTAMP | Waktu approval |
-| approved_by | VARCHAR(255) | Nama yang menyetujui |
-| created_at | TIMESTAMP | Waktu pengajuan |
-| updated_at | TIMESTAMP | Waktu update terakhir |
+| customer_name | VARCHAR(255) | Customer name |
+| nik | VARCHAR(16) | Customer ID number (unique) |
+| vehicle_type | VARCHAR(100) | Vehicle type |
+| vehicle_price | DECIMAL(15,2) | Vehicle price |
+| ktp_image_base64 | TEXT | ID card image in Base64 |
+| status | VARCHAR(50) | Application status |
+| notes | TEXT | Approval/rejection notes |
+| approved_at | TIMESTAMP | Approval time |
+| approved_by | VARCHAR(255) | Approver name |
+| created_at | TIMESTAMP | Application time |
+| updated_at | TIMESTAMP | Last update time |
 
 ## 🎯 API Endpoints
 
 | Method | URL | Description |
 |--------|-----|-------------|
-| GET | `/` | Dashboard utama |
-| POST | `/submit` | Submit pengajuan kredit |
-| POST | `/approve/{id}` | Approve pengajuan |
-| POST | `/reject/{id}` | Reject pengajuan |
+| GET | `/` | Main dashboard |
+| POST | `/submit` | Submit credit application |
+| POST | `/approve/{id}` | Approve application |
+| POST | `/reject/{id}` | Reject application |
 | GET | `/health` | Health check endpoint |
 
 ## 📱 Screenshots
 
-### Form Pengajuan
-- Interface clean untuk input data konsumen
-- Upload KTP dengan drag & drop
-- Validasi real-time
+### Application Form
+- Clean interface for customer data input
+- ID card upload with drag & drop
+- Real-time validation
 
-### Dashboard Approval
-- Table dengan pagination
-- Filter dan search functionality
-- Modal untuk view KTP
+### Approval Dashboard
+- Table with pagination
+- Filter and search functionality
+- Modal for viewing ID cards
 - Statistics cards
 
 ## 🚨 Troubleshooting
@@ -191,7 +191,7 @@ Visit http://localhost:8000
 ### Common Issues
 
 1. **Database Connection Error**
-   - Pastikan MySQL service running
+   - Ensure MySQL service is running
    - Check database credentials
    - Verify network connectivity
 
@@ -207,8 +207,8 @@ Visit http://localhost:8000
 
 ## 📞 Support
 
-Untuk pertanyaan atau issue:
-1. Check dokumentasi ini
+For questions or issues:
+1. Check this documentation
 2. Review error logs
 3. Contact development team
 
@@ -218,4 +218,4 @@ MIT License
 
 ---
 
-**Built with ❤️ untuk kemudahan pengajuan kredit kendaraan**
+**Built with ❤️ for easy vehicle credit applications**
