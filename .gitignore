@@ -24,3 +24,12 @@ Thumbs.db
 # Custom
 /bootstrap/cache/*.php
 /storage/logs/*.log
+/storage/framework/sessions/*
+/storage/framework/cache/*
+/storage/framework/views/*
+
+# Composer
+composer.lock
+
+# SQLite database
+database/database.sqlite

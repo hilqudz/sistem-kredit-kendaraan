@@ -256,7 +256,8 @@
 
                                                 <!-- Modal Approve -->
                                                 <div x-show="showApproval" x-cloak 
-                                                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                                     @click.self="showApproval = false">
                                                     <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
                                                         <h3 class="text-lg font-semibold mb-4">Konfirmasi Persetujuan</h3>
                                                         <p class="text-gray-600 mb-4">Setujui pengajuan kredit atas nama <strong>{{ $item->customer_name }}</strong>?</p>
@@ -265,18 +266,18 @@
                                                             <div class="mb-4">
                                                                 <label class="block text-sm font-medium mb-2">Nama Penyetuju</label>
                                                                 <input type="text" name="approved_by" required 
-                                                                       class="w-full border rounded px-3 py-2" placeholder="Nama Anda">
+                                                                       class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Masukkan nama Anda">
                                                             </div>
                                                             <div class="mb-4">
                                                                 <label class="block text-sm font-medium mb-2">Catatan (Opsional)</label>
-                                                                <textarea name="notes" class="w-full border rounded px-3 py-2" rows="3" placeholder="Tambahkan catatan..."></textarea>
+                                                                <textarea name="notes" class="w-full border border-gray-300 rounded px-3 py-2" rows="3" placeholder="Tambahkan catatan approval..."></textarea>
                                                             </div>
                                                             <div class="flex gap-2 justify-end">
                                                                 <button type="button" @click="showApproval = false" 
-                                                                        class="px-4 py-2 text-gray-600 hover:text-gray-800">Batal</button>
+                                                                        class="px-4 py-2 text-gray-600 hover:text-gray-800 border rounded">Batal</button>
                                                                 <button type="submit" 
                                                                         class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                                                                    Setujui
+                                                                    ✅ Setujui Pengajuan
                                                                 </button>
                                                             </div>
                                                         </form>
@@ -285,22 +286,23 @@
 
                                                 <!-- Modal Reject -->
                                                 <div x-show="showReject" x-cloak 
-                                                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                                     @click.self="showReject = false">
                                                     <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
                                                         <h3 class="text-lg font-semibold mb-4">Konfirmasi Penolakan</h3>
                                                         <p class="text-gray-600 mb-4">Tolak pengajuan kredit atas nama <strong>{{ $item->customer_name }}</strong>?</p>
                                                         <form action="{{ route('credit.reject', $item->id) }}" method="POST">
                                                             @csrf
                                                             <div class="mb-4">
-                                                                <label class="block text-sm font-medium mb-2">Alasan Penolakan</label>
-                                                                <textarea name="notes" required class="w-full border rounded px-3 py-2" rows="3" placeholder="Berikan alasan penolakan..."></textarea>
+                                                                <label class="block text-sm font-medium mb-2">Alasan Penolakan *</label>
+                                                                <textarea name="notes" required class="w-full border border-gray-300 rounded px-3 py-2" rows="4" placeholder="Berikan alasan penolakan yang jelas..."></textarea>
                                                             </div>
                                                             <div class="flex gap-2 justify-end">
                                                                 <button type="button" @click="showReject = false" 
-                                                                        class="px-4 py-2 text-gray-600 hover:text-gray-800">Batal</button>
+                                                                        class="px-4 py-2 text-gray-600 hover:text-gray-800 border rounded">Batal</button>
                                                                 <button type="submit" 
                                                                         class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                                                                    Tolak
+                                                                    ❌ Tolak Pengajuan
                                                                 </button>
                                                             </div>
                                                         </form>
@@ -309,15 +311,23 @@
                                             @else
                                                 <div class="text-sm">
                                                     @if($item->status == 'Approved')
-                                                        <p class="text-green-600 font-medium">✓ Disetujui</p>
-                                                        @if($item->approved_by)
-                                                            <p class="text-gray-500">oleh {{ $item->approved_by }}</p>
-                                                        @endif
-                                                    @else
-                                                        <p class="text-red-600 font-medium">✗ Ditolak</p>
+                                                        <div class="text-green-600 font-medium">
+                                                            <p>✅ Disetujui</p>
+                                                            @if($item->approved_by)
+                                                                <p class="text-gray-500 text-xs">oleh {{ $item->approved_by }}</p>
+                                                            @endif
+                                                            @if($item->approved_at)
+                                                                <p class="text-gray-500 text-xs">{{ $item->approved_at->format('d/m/Y H:i') }}</p>
+                                                            @endif
+                                                        </div>
+                                                    @elseif($item->status == 'Rejected')
+                                                        <div class="text-red-600 font-medium">
+                                                            <p>❌ Ditolak</p>
+                                                            <p class="text-gray-500 text-xs">{{ $item->updated_at->format('d/m/Y H:i') }}</p>
+                                                        </div>
                                                     @endif
                                                     @if($item->notes)
-                                                        <p class="text-gray-500 text-xs mt-1">{{ Str::limit($item->notes, 30) }}</p>
+                                                        <p class="text-gray-500 text-xs mt-1 italic">"{{ Str::limit($item->notes, 30) }}"</p>
                                                     @endif
                                                 </div>
                                             @endif
